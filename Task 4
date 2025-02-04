@@ -1,0 +1,51 @@
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Sample movie dataset
+movies = pd.DataFrame({
+    'movie_id': [1, 2, 3, 4, 5],
+    'title': ['The Matrix', 'Inception', 'The Dark Knight', 'Interstellar', 'The Prestige'],
+    'genres': ['Action, Sci-Fi', 'Action, Sci-Fi', 'Action, Crime', 'Sci-Fi, Drama', 'Drama, Mystery'],
+    'description': [
+        'A computer hacker learns from mysterious rebels about the true nature of his reality.',
+        'A thief who steals corporate secrets through the use of dream-sharing technology.',
+        'When the menace known as The Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.',
+        'A team of explorers travels through a wormhole in space in an attempt to ensure humanity\'s survival.',
+        'A magician seeks for the secret to the ultimate illusion, but his obsession has dangerous consequences.'
+    ]
+})
+
+# Step 1: Create a TF-IDF Vectorizer to convert the movie descriptions to numerical data
+vectorizer = TfidfVectorizer(stop_words='english')
+
+# Combine 'genres' and 'description' into one column as feature for recommendation
+movies['combined_features']= movies['genres'] + ' '  + movies['description']
+
+# convert combined features to tf-idf matrix
+tfidf_matrix = vectorizer.fit_transform(movies['combined_features'])
+
+# Step 2: Calculate cosine similarity between movies
+cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+
+# Step 3: Define a function to recommend movies
+def recommend_movie(title):
+    idx = movies[movies['title'] == title].index[0]
+    sim_scores = list(enumerate(cosine_sim[idx]))
+
+    # Sort movies based on similarity scores
+    sim_scores = sorted(sim_score, key=lamdba x: x[1], reverse=True)
+
+    # Get the indices of the top 3 most similar movies (excluding the movie itself)
+    top_movies_idx = [i[0] for i in sim_scores[1:4]]
+
+    # Return the titles of the recommended movies
+    return movies['title'].iloc[top_movies_idx]
+
+# Test the recommendation system
+user_input = "Inception"
+recommended_movies = recommended_movie(user_input)
+
+print(f"Recommended_movies for '{user_input}':")
+for movie in recommended_movies:
+print(movie)
